@@ -75,26 +75,86 @@ function runSearch() {
 }
 
 function addDepartments() {
-    var query = "SELECT * FROM departments";
-    connection.query(query, function (err, res) {
-        console.table(res);
-        runSearch();
-    });
+    inquirer
+        .prompt({
+            type: "input",
+            name: "department",
+            message: 'What is the name of the department?'
+        })
+        .then((function (answer) {
+            console.log(answer);
+            var query = "INSERT INTO departments (department_name) VALUES ?";
+            var values = [[answer.department]]
+            connection.query(query, [values], function (err, res) {
+                console.log(res);
+                runSearch();
+            });
+        }))
 }
 
 function addRoles() {
-    var query = "SELECT * FROM departments";
-    connection.query(query, function (err, res) {
-        console.table(res);
-        runSearch();
+    var query = "SELECT department_name as name, id as value FROM departments";
+    connection.query(query, function (err, departments) {
+        inquirer
+            .prompt([{
+                type: "input",
+                name: "title",
+                message: 'What is the role title?'
+            },
+            {
+                type: "input",
+                name: "salary",
+                message: 'What is the salary?'
+            },
+            {
+                type: "list",
+                name: "departmentId",
+                message: "What is the department name?",
+                choices: departments
+            }
+            ])
+            .then((function (answer) {
+                console.log(answer);
+                var query = "INSERT INTO roles (title,salary,department_id) VALUES ?";
+                var values = [[answer.title, answer.salary, answer.departmentId]]
+                connection.query(query, [values], function (err, res) {
+                    console.log(res);
+                    runSearch();
+                });
+            }))
     });
 }
 
 function addEmployees() {
-    var query = "SELECT * FROM departments";
-    connection.query(query, function (err, res) {
-        console.table(res);
-        runSearch();
+    var query = "SELECT title as name, id as value FROM roles";
+    connection.query(query, function (err, roles) {
+        inquirer
+            .prompt([{
+                type: "input",
+                name: "firstName",
+                message: 'What is the first name?'
+            },
+            {
+                type: "input",
+                name: "lastName",
+                message: 'What is the last name?'
+            },
+            {
+                type: "list",
+                name: "roleId",
+                message: "What is the role title?",
+                choices: roles
+            }
+            ])
+            .then((function (answer) {
+                console.log(answer);
+                var query = "INSERT INTO employees (first_name,last_name,role_id) VALUES ?";
+                var values = [[answer.firstName, answer.lastName, answer.roleId]]
+                connection.query(query, [values], function (err, res) {
+                    console.log(res);
+                    runSearch();
+                });
+            }))
     });
 }
 
@@ -115,7 +175,7 @@ function viewRoles() {
 }
 
 function viewEmployees() {
-    var query = "SELECT * FROM roles";
+    var query = "SELECT * FROM employees";
     connection.query(query, function (err, res) {
         console.table(res);
         runSearch();
